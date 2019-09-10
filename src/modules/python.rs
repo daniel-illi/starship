@@ -17,6 +17,7 @@ use super::{Context, Module};
 pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     let is_py_project = context
         .new_scan_dir()
+        .ok()?
         .set_files(&[
             "requirements.txt",
             ".python-version",

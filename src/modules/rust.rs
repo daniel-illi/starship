@@ -11,6 +11,7 @@ use super::{Context, Module};
 pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     let is_rs_project = context
         .new_scan_dir()
+        .ok()?
         .set_files(&["Cargo.toml"])
         .set_extensions(&["rs"])
         .scan();

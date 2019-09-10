@@ -16,6 +16,7 @@ use super::{Context, Module};
 pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     let is_go_project = context
         .new_scan_dir()
+        .ok()?
         .set_files(&["go.mod", "go.sum", "glide.yaml", "Gopkg.yml", "Gopkg.lock"])
         .set_extensions(&["go"])
         .set_folders(&["Godeps"])

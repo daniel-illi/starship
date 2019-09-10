@@ -91,7 +91,7 @@ impl<'a> Context<'a> {
     // see ScanDir for methods
     pub fn new_scan_dir(&'a self) -> Result<ScanDir<'a>, std::io::Error> {
         Ok(ScanDir {
-            dir_files: self.get_dir_files()?.as_ref(),
+            dir_files: self.get_dir_files()?,
             files: &[],
             folders: &[],
             extensions: &[],
@@ -100,33 +100,35 @@ impl<'a> Context<'a> {
 
     /// Will lazily get repo root and branch when a module requests it.
     pub fn get_repo(&self) -> Result<&Repo, std::io::Error> {
-        self.repo.get_or_try_init(|| -> Result<Repo, std::io::Error> {
-            let repository = Repository::discover(&self.current_dir).ok();
-            let branch = repository
-                .as_ref()
-                .and_then(|repo| get_current_branch(repo));
-            let root = repository
-                .as_ref()
-                .and_then(|repo| repo.workdir().map(Path::to_path_buf));
-            let state = repository.as_ref().map(|repo| repo.state());
+        self.repo
+            .get_or_try_init(|| -> Result<Repo, std::io::Error> {
+                let repository = Repository::discover(&self.current_dir).ok();
+                let branch = repository
+                    .as_ref()
+                    .and_then(|repo| get_current_branch(repo));
+                let root = repository
+                    .as_ref()
+                    .and_then(|repo| repo.workdir().map(Path::to_path_buf));
+                let state = repository.as_ref().map(|repo| repo.state());
 
-            Ok(Repo {
-                branch,
-                root,
-                state,
+                Ok(Repo {
+                    branch,
+                    root,
+                    state,
+                })
             })
-        })
     }
 
     pub fn get_dir_files(&self) -> Result<&Vec<PathBuf>, std::io::Error> {
-        self.dir_files.get_or_try_init(|| -> Result<Vec<PathBuf>, std::io::Error> {
-            let dir_files = fs::read_dir(&self.current_dir)?
-                .filter_map(Result::ok)
-                .map(|entry| entry.path())
-                .collect::<Vec<PathBuf>>();
+        self.dir_files
+            .get_or_try_init(|| -> Result<Vec<PathBuf>, std::io::Error> {
+                let dir_files = fs::read_dir(&self.current_dir)?
+                    .filter_map(Result::ok)
+                    .map(|entry| entry.path())
+                    .collect::<Vec<PathBuf>>();
 
-            Ok(dir_files)
-        })
+                Ok(dir_files)
+            })
     }
 }
 
